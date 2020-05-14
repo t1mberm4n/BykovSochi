@@ -17,7 +17,8 @@ def start(update, context):
         "Я бот. Предназначен для множества задач. Не общайтесь со мной ненормативным лексиконом."
         " /randomword - выводит случайное слово из словаря Ожегова со значением."
         " Если написать город в текстовом сообщении вы получите погоду."
-        " Если бот не отвечает, проверьте правильность написания слова и повторите запрос.",
+        " Если бот не отвечает, проверьте правильность написания слова и повторите запрос."
+        "Напишите в сообщение /word + слово чтобы сделать запрос к словарю Ожегова.",
         reply_markup=markup
     )
 
@@ -52,6 +53,35 @@ def weather(update, context):
     )
 
 
+def word(update, context):
+    poisk = context.args[0]
+    update.message.reply_text("Ищем данные для => "+poisk)
+    # читаем файл построчно
+    with open("words.txt") as inp:
+        lines = inp.readlines()
+    fl = False
+    for i in lines:
+        # когда встречаем слово выводим его и прерываем цикл
+        if str(poisk).upper() in i:
+            fl = True
+            update.message.reply_text(i)
+            break
+        else:
+            continue
+    # если слово не нашлось - информируем об этом
+    if fl is False:
+        update.message.reply_text('Извините, я не нашел информацию по данному запросу. Попробуйте другой.')
+
+
+def help(update, context):
+    update.message.reply_text(
+        "Я бот. Предназначен для множества задач. Не общайтесь со мной ненормативным лексиконом."
+        " /randomword - выводит случайное слово из словаря Ожегова со значением."
+        " Если написать город в текстовом сообщении вы получите погоду."
+        " Если бот не отвечает, проверьте правильность написания слова и повторите запрос."
+        "Напишите в сообщение /word + слово чтобы сделать запрос к словарю Ожегова.")
+
+
 def close_keyboard(update, context):
     update.message.reply_text(
         "Ok",
@@ -67,6 +97,8 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("randomword", randomword))
     dp.add_handler(CommandHandler("close", close_keyboard))
+    dp.add_handler(CommandHandler("word", word))
+    dp.add_handler(CommandHandler("help", help))
     text_handler = MessageHandler(Filters.text, weather)
     dp.add_handler(text_handler)
     updater.start_polling()
